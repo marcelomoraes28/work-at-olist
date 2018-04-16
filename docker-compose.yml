@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  database:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: masterpass
+      POSTGRES_USER: userdb
+      POSTGRES_DB: callcenter
+  web:
+    build: .
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./callcenter:/source
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
