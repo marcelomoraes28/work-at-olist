@@ -1,10 +1,10 @@
 from django.db import models
 
 
-class Costs(models.Model):
+class Cost(models.Model):
     STATUS = (
-        ("Ativo", 1),
-        ("Inativo", 2)
+        (1, "Ativo"),
+        (2, "Inativo")
     )
 
     created_at = models.DateField(
