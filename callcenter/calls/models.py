@@ -1,15 +1,19 @@
 from django.db import models
 
+TYPES = (
+    (1, "Start"),
+    (2, "End")
+)
+STATUS = (
+    (1, "Ativo"),
+    (2, "Inativo")
+)
+
 
 class Cost(models.Model):
     """
     Configuration cost per calls
     """
-    STATUS = (
-        (1, "Ativo"),
-        (2, "Inativo")
-    )
-
     created_at = models.DateField(
         verbose_name='Criado em',
         auto_now_add=True
@@ -42,12 +46,8 @@ class Call(models.Model):
     """
     Register calls =)
     """
-    TYPES = (
-        (1, "Start"),
-        (2, "End")
-    )
     timestamp = models.DateTimeField(auto_now=True, verbose_name="Data")
-    type = models.IntegerField(choices=TYPES, verbose_name="Tipo da ligação")
+    call_type = models.IntegerField(choices=TYPES, verbose_name="Tipo da ligação")
     call_id = models.CharField(max_length=32, verbose_name="Código")
     source = models.CharField(max_length=11, verbose_name="Remetente")
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
