@@ -1,40 +1,54 @@
 from .models import Call, Bill, TYPES
 from rest_framework import serializers
 
+import rest_framework.validators
+from .validators.custom_validator import RequiredIf
+
 
 class CallSerializer(serializers.Serializer):
     """
     Call Serializer class
     """
-    source = serializers.CharField(required=False, min_length=10,
-                                   max_length=11)
-    destination = serializers.CharField(required=False, min_length=10,
-                                        max_length=11)
-    type = serializers.ChoiceField(choices=TYPES, default=1)
-
-    call_id = serializers.CharField(required=False, max_length=32)
+    call_id = serializers.CharField(required=False, max_length=32,
+                                    min_length=32)
+    destination = serializers.CharField(min_length=10,
+                                        max_length=11,
+                                        required=False
+                                        )
+    call_type = serializers.ChoiceField(choices=TYPES, required=True)
+    source = serializers.CharField(min_length=10,
+                                   max_length=11,
+                                   required=False
+                                   )
 
     def create(self, validated_data):
         return Call.objects.create(**validated_data)
 
     def validate(self, data):
-        if data['type'] == TYPES[0][0]:
+        if data['call_type'] == TYPES[0][0]:
             call = Call.objects.filter(source=data['source'],
                                        destination=data['destination']).last()
             if call and call.call_type == TYPES[0][0]:
                 raise serializers.ValidationError(
                     'Warning, this call has already been terminated.')
         else:
-            call_finished = Call.objects.filter(source=data['source'],
-                                                destination=data['destination'])\
-                .last()
-            if call_finished.call_id != data['call_id']:
+            call_finished = Call.objects.filter(call_id=data['call_id']).last()
+            if call_finished and call_finished.call_type == TYPES[1][0]:
                 raise serializers.ValidationError(
-                    "Call_id doesn't match.")
+                    "Hey, This call has already been closed.")
+            elif not call_finished:
+                raise serializers.ValidationError(
+                    "Hey, This call does not exist.")
+        return data
 
     class Meta:
         model = Call
-        fields = ('type', 'call_id', 'source', 'destination')
+        fields = ('call_type', 'call_id', 'source', 'destination')
+        validators = [RequiredIf(fields=('call_id',),
+                                 condition=('call_type', 2)),
+                      RequiredIf(fields=('source', 'destination'),
+                                 condition=('call_type', 1))
+                      ]
 
 
 class BillSerializer(serializers.HyperlinkedModelSerializer):
