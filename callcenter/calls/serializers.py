@@ -27,12 +27,12 @@ class CallSerializer(serializers.Serializer):
     def validate(self, data):
         if data['call_type'] == TYPES[0][0]:
             call = Call.objects.filter(source=data['source'],
-                                       destination=data['destination']).last()
+                                       destination=data['destination']).first()
             if call and call.call_type == TYPES[0][0]:
                 raise serializers.ValidationError(
                     'Warning, this call has already been terminated.')
         else:
-            call_finished = Call.objects.filter(call_id=data['call_id']).last()
+            call_finished = Call.objects.filter(call_id=data['call_id']).first()
             if call_finished and call_finished.call_type == TYPES[1][0]:
                 raise serializers.ValidationError(
                     "Hey, This call has already been closed.")
