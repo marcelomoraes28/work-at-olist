@@ -16,3 +16,8 @@ services:
       - "8000:8000"
     depends_on:
       - database
+  redis:
+    image: redis:latest
+    container_name: call_redis
+    ports:
+     - '6379:6379'
