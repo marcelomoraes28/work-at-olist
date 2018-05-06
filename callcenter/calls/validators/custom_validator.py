@@ -23,17 +23,19 @@ class RequiredIf(object):
         self.condition = condition
 
     def enforce_required_fields(self, attrs):
-        # TODO: Validate others contitions like < > !=
-        if not self.condition[1] and self.condition[0] not in attrs:
+        # TODO: Validate others conditions like < > !=
+        missing = []
+        if self.condition[1] is False:
             missing = dict([(field_name, self.missing_message)
                             for field_name in self.fields
                             if field_name not in dict(attrs)
                             ])
-        else:
+        elif attrs[self.condition[0]] == self.condition[1]:
             missing = dict([(field_name, self.missing_message)
-                            for field_name in self.condition
-                            if isinstance(field_name, str) and field_name
-                            not in attrs])
+                            for field_name in self.fields
+                            if field_name not in dict(attrs)
+                            ])
+
         if missing:
             raise ValidationError(missing)
 
