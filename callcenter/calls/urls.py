@@ -4,5 +4,5 @@ from rest_framework import routers
 from . import views
 
 urlpatterns = [
-    url(r'^calls$', views.CallViewSet.as_view()),
+    url(r'^calls$', views.CallViewSet.as_view(), name='calls'),
 ]
