@@ -15,6 +15,41 @@ STATUS = (
 )
 
 
+class Call(models.Model):
+    """
+    Register calls =)
+    """
+    timestamp = models.DateTimeField(auto_now=True, verbose_name="Data")
+    call_type = models.IntegerField(choices=TYPES, verbose_name="Tipo da ligação")
+    call_id = models.CharField(max_length=32, verbose_name="Código")
+    source = models.CharField(max_length=11, verbose_name="Remetente")
+    destination = models.CharField(max_length=11, verbose_name="Destinatário")
+
+    # Metadata
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Chamada"
+
+
+@receiver(post_save, sender=Call)
+def generate_call_id(sender, instance, created, **kwargs):
+    """
+    Signal do generate a call_id
+    :param sender:
+    :param instance:
+    :param created:
+    :param kwargs:
+    :return:
+    """
+    call = instance
+    if created and call.call_id is "":
+        call.call_id = hashlib.md5(str(str(call.id)+uuid.uuid4().hex)
+                                   .encode('utf-8')).hexdigest()
+        call.save()
+    elif created and call.call_id:
+        pass
+
+
 class Cost(models.Model):
     """
     Configuration cost per calls
@@ -47,44 +82,13 @@ class Cost(models.Model):
         verbose_name = 'Configuração dos custos'
 
 
-class Call(models.Model):
-    """
-    Register calls =)
-    """
-    timestamp = models.DateTimeField(auto_now=True, verbose_name="Data")
-    call_type = models.IntegerField(choices=TYPES, verbose_name="Tipo da ligação")
-    call_id = models.CharField(max_length=32, verbose_name="Código")
-    source = models.CharField(max_length=11, verbose_name="Remetente")
-    destination = models.CharField(max_length=11, verbose_name="Destinatário")
-
-    # Metadata
-    class Meta:
-        ordering = ["-id"]
-        verbose_name = "Chamada"
-
-
-@receiver(post_save, sender=Call)
-def generate_call_id(sender, instance, created, **kwargs):
-    """
-    Signal do generate a call_id
-    :param sender:
-    :param instance:
-    :param created:
-    :param kwargs:
-    :return:
-    """
-    call = instance
-    if created and call.call_id is "":
-        call.call_id = hashlib.md5(str(str(call.id)+uuid.uuid4().hex)
-                                   .encode('utf-8')).hexdigest()
-        call.save()
-
-
 class Bill(models.Model):
     """
     Bill of users
     """
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
+    call_id = models.CharField(max_length=32, verbose_name="Código",
+                               null=True, blank=False)
     call_start_date = models.DateField(verbose_name="Data da Ligação")
     call_start_time = models.TimeField(verbose_name="Horário da Ligação")
     call_price = models.FloatField(verbose_name="Valor da chamada")
