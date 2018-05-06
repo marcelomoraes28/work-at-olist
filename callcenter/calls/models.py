@@ -1,4 +1,9 @@
+import uuid
+import hashlib
+
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 TYPES = (
     (1, "Start"),
@@ -56,6 +61,23 @@ class Call(models.Model):
     class Meta:
         ordering = ["-id"]
         verbose_name = "Chamada"
+
+
+@receiver(post_save, sender=Call)
+def generate_call_id(sender, instance, created, **kwargs):
+    """
+    Signal do generate a call_id
+    :param sender:
+    :param instance:
+    :param created:
+    :param kwargs:
+    :return:
+    """
+    call = instance
+    if created and call.call_id is "":
+        call.call_id = hashlib.md5(str(str(call.id)+uuid.uuid4().hex)
+                                   .encode('utf-8')).hexdigest()
+        call.save()
 
 
 class Bill(models.Model):
