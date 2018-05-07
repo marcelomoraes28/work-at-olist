@@ -7,7 +7,19 @@ services:
       POSTGRES_PASSWORD: masterpass
       POSTGRES_USER: userdb
       POSTGRES_DB: callcenter
+  celery:
+    environment:
+      TIME_ZONE: America/Sao_Paulo
+    build: .
+    command: celery -A callcenter worker -l info
+    volumes:
+      - ./callcenter:/source
+    depends_on:
+      - database
+      - redis
   web:
+    environment:
+      TIME_ZONE: America/Sao_Paulo
     build: .
     command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
