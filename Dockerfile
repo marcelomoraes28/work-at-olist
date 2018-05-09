@@ -10,4 +10,6 @@ ENV POSTGRES_HOST=database
 RUN mkdir -p /source
 WORKDIR /source
 ADD requirements.txt /source/
+RUN apt install tzdata
+RUN ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
 RUN pip install -r requirements.txt
