@@ -1,4 +1,3 @@
-import re
 from datetime import datetime, timedelta, date
 import time
 
@@ -23,6 +22,8 @@ class CalculateCost(object):
         self.connection_cost = connection_cost
         self.initial_period = initial_period
         self.end_period = end_period
+        CalculateCost.validate_datetime(self.initial_period, '%H:%M:%S')
+        CalculateCost.validate_datetime(self.end_period, '%H:%M:%S')
 
     @staticmethod
     def duration_of_call(initial_date, final_date):
@@ -36,9 +37,17 @@ class CalculateCost(object):
         t2 = datetime.strptime(final_date, FMT)
         t1_ts = time.mktime(t1.timetuple())
         t2_ts = time.mktime(t2.timetuple())
-        m, s = divmod(t2_ts - t1_ts, 60)
-        h, m = divmod(m, 60)
-        return {"hour": h, "minutes": int(m), "seconds": s, "t1": t1, "t2": t2}
+        total_minutes, s = divmod(t2_ts - t1_ts, 60)
+        h, m = divmod(total_minutes, 60)
+        return {"hour": h, "minutes": int(m), "seconds": s, "t1": t1, "t2": t2,
+                "total_minutes": int(total_minutes)}
+
+    @staticmethod
+    def validate_datetime(date_text, pattern='%Y-%m-%d %H:%M:%S'):
+        try:
+            datetime.strptime(date_text, pattern)
+        except ValueError:
+            raise ValueError("Incorrect format, should be %s" % pattern)
 
     def calculate_cost_per_period(self, initial_date, final_date):
         """
@@ -47,27 +56,30 @@ class CalculateCost(object):
         :param final_date: datetime %Y-%m-%d %H:%M:%S
         :return:
         """
+        try:
+            CalculateCost.validate_datetime(initial_date, '%Y-%m-%d %H:%M:%S')
+            CalculateCost.validate_datetime(final_date, '%Y-%m-%d %H:%M:%S')
+            call_duration = CalculateCost.duration_of_call(initial_date,
+                                                           final_date)
+            t1 = call_duration["t1"]
+            t2 = call_duration["t2"]
+            total_minutes = call_duration["total_minutes"]
+            minutes = call_duration["minutes"]
+            hour = call_duration["hour"]
+            seconds = call_duration["seconds"]
+            start_ot = datetime.strptime(
+                self.initial_period + " {}".format(t1.date()),
+                "%H:%M:%S %Y-%m-%d") - timedelta(days=1)
+            end_ot = datetime.strptime(
+                self.end_period + " {}".format(t2.date()),
+                "%H:%M:%S %Y-%m-%d") + timedelta(days=1)
+            total_pay = self.connection_cost
+            for x in range(total_minutes):
+                t1 += timedelta(minutes=1)
+                if t1 < t2 and start_ot.time() < t1.time() < end_ot.time():
+                    total_pay += self.cost_per_minute
 
-        t1t = datetime.strptime(initial_date.split(" ")[1], FMTIME)
-        call_duration = CalculateCost.duration_of_call(initial_date, final_date)
-        t1 = call_duration["t1"]
-        t2 = call_duration["t2"]
-        minutes = call_duration["minutes"]
-        hour = call_duration["hour"]
-        seconds = call_duration["seconds"]
-        start_ot = datetime.strptime(
-            self.initial_period + " {}".format(t1.date()),
-            "%H:%M:%S %Y-%m-%d")
-        end_ot = datetime.strptime(self.end_period + " {}".format(t2.date()),
-                                   "%H:%M:%S %Y-%m-%d")
-        initial_period = datetime.strptime(self.initial_period, "%H:%M:%S")
-        end_period = datetime.strptime(self.end_period, "%H:%M:%S")
-        total_pay = self.connection_cost
-        for x in range(minutes):
-            if start_ot <= t1 < end_ot and t1 < t2 and initial_period <= t1t < end_period:
-                total_pay += self.cost_per_minute
-            t1 += timedelta(minutes=1)
-            t1t += timedelta(minutes=1)
-
-        return {"total": total_pay,
-                "duration": "%d:%02d:%02d" % (hour, minutes, seconds)}
+            return {"cost": total_pay,
+                    "duration": "%d:%02d:%02d" % (hour, minutes, seconds)}
+        except Exception as e:
+            raise e
