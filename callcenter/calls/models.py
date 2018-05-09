@@ -5,6 +5,8 @@ from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
+from .tasks import generate_bill
+
 TYPES = (
     (1, "Start"),
     (2, "End")
@@ -19,9 +21,9 @@ class Call(models.Model):
     """
     Register calls =)
     """
-    timestamp = models.DateTimeField(auto_now=True, verbose_name="Data")
+    timestamp = models.DateTimeField(verbose_name="Data")
     call_type = models.IntegerField(choices=TYPES, verbose_name="Tipo da ligação")
-    call_id = models.CharField(max_length=32, verbose_name="Código")
+    call_id = models.IntegerField(verbose_name="Código")
     source = models.CharField(max_length=11, verbose_name="Remetente")
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
 
@@ -47,7 +49,12 @@ def generate_call_id(sender, instance, created, **kwargs):
                                    .encode('utf-8')).hexdigest()
         call.save()
     elif created and call.call_id:
-        pass
+        start = Call.objects\
+            .filter(call_type=TYPES[0][0], call_id=call.call_id).last()
+        call.source = start.source
+        call.destination = start.destination
+        call.save()
+        generate_bill.delay(call.call_id)
 
 
 class Cost(models.Model):
@@ -92,6 +99,8 @@ class Bill(models.Model):
     call_start_date = models.DateField(verbose_name="Data da Ligação")
     call_start_time = models.TimeField(verbose_name="Horário da Ligação")
     call_price = models.FloatField(verbose_name="Valor da chamada")
+    duration = models.TimeField(verbose_name="Duração da Ligação",
+                                null=True)
 
     #Metaclass
     class Meta:
