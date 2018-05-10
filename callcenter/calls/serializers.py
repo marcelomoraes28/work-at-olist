@@ -1,16 +1,15 @@
-from .models import Call, Bill, TYPES
 from rest_framework import serializers
 
-import rest_framework.validators
 from .validators.custom_validator import RequiredIf
+from .models import Call, Bill, TYPES
+from .tasks import generate_bill
 
 
 class CallSerializer(serializers.Serializer):
     """
     Call Serializer class
     """
-    call_id = serializers.CharField(required=False, max_length=32,
-                                    min_length=32)
+    call_id = serializers.IntegerField(required=True)
     destination = serializers.CharField(min_length=10,
                                         max_length=11,
                                         required=False
@@ -20,11 +19,25 @@ class CallSerializer(serializers.Serializer):
                                    max_length=11,
                                    required=False
                                    )
+    timestamp = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S",
+                                          required=True)
 
     def create(self, validated_data):
-        return Call.objects.create(**validated_data)
+        created = Call.objects.create(**validated_data)
+        if created.call_type == TYPES[1][0]:
+            last = Call.objects.filter(call_id=created.call_id).last()
+            created.source = last.source
+            created.destination = last.destination
+            created.save()
+            generate_bill.delay(created.call_id)
+        return created
 
     def validate(self, data):
+        call_exist = Call.objects.filter(call_id=data['call_id'],
+                                         call_type=TYPES[1][0]).first()
+        if call_exist:
+            raise serializers.ValidationError(
+                    'This call already exists and has already been closed.')
         if data['call_type'] == TYPES[0][0]:
             call = Call.objects.filter(source=data['source'],
                                        destination=data['destination']).first()
@@ -36,6 +49,9 @@ class CallSerializer(serializers.Serializer):
             if call_finished and call_finished.call_type == TYPES[1][0]:
                 raise serializers.ValidationError(
                     "Hey, This call has already been closed.")
+            elif call_finished and call_finished.timestamp > data['timestamp']:
+                raise serializers.ValidationError(
+                    "The date can not be less than %s" % call_finished.timestamp)
             elif not call_finished:
                 raise serializers.ValidationError(
                     "Hey, This call does not exist.")
