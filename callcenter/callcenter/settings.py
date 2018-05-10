@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'celery',
     'redis',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
