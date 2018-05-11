@@ -6,14 +6,14 @@ services:
     environment:
       POSTGRES_PASSWORD: masterpass
       POSTGRES_USER: userdb
-      POSTGRES_DB: callcenter
+      POSTGRES_DB: call_project
   celery:
     environment:
       TIME_ZONE: America/Sao_Paulo
     build: .
-    command: celery -A callcenter worker -l info
+    command: celery -A call_project worker -l info
     volumes:
-      - ./callcenter:/source
+      - ./call_project:/source
     depends_on:
       - database
       - redis
@@ -21,13 +21,14 @@ services:
     environment:
       TIME_ZONE: America/Sao_Paulo
     build: .
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: bash -c "python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ./callcenter:/source
+      - ./call_project:/source
     ports:
       - "8000:8000"
     depends_on:
       - database
+      - redis
   redis:
     image: redis:latest
     container_name: call_redis

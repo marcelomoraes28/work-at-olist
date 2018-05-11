@@ -1,5 +1,5 @@
 """
-WSGI config for callcenter project.
+WSGI config for call_project project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "callcenter.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "call_project.settings")
 
 application = get_wsgi_application()

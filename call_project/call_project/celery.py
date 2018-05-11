@@ -5,9 +5,9 @@ import logging
 
 logger = logging.getLogger("Celery")
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'callcenter.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'call_project.settings')
 
-app = Celery('callcenter')
+app = Celery('call_project')
 
 app.config_from_object('django.conf:settings', namespace='CELERY')
 

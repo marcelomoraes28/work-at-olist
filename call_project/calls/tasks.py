@@ -1,4 +1,4 @@
-from callcenter.celery import app
+from call_project.celery import app
 
 from .cost import CalculateCost
 from .models import Cost, STATUS, Bill, Call
