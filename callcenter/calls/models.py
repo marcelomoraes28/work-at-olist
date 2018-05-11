@@ -94,7 +94,7 @@ class Bill(models.Model):
     """
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
     call_id = models.CharField(max_length=32, verbose_name="Código",
-                               null=True, blank=False)
+                               null=True, blank=False, unique=True)
     call_start_date = models.DateField(verbose_name="Data da Ligação")
     call_start_time = models.TimeField(verbose_name="Horário da Ligação")
     call_price = models.FloatField(verbose_name="Valor da chamada")
