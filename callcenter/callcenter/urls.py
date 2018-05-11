@@ -17,10 +17,14 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include, url
 
+from rest_framework_swagger.views import get_swagger_view
+
+schema_view = get_swagger_view(title='Pastebin API')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^calls/',
         include('calls.urls'), name='calls'),
+    url(r'^docs$', schema_view),
     url(r'^api-auth/', include('rest_framework.urls')),
 ]
