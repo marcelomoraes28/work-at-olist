@@ -2,8 +2,7 @@ import uuid
 import hashlib
 
 from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import post_save
+
 
 TYPES = (
     (1, "Start"),
@@ -19,9 +18,10 @@ class Call(models.Model):
     """
     Register calls =)
     """
-    timestamp = models.DateTimeField(auto_now=True, verbose_name="Data")
-    call_type = models.IntegerField(choices=TYPES, verbose_name="Tipo da ligação")
-    call_id = models.CharField(max_length=32, verbose_name="Código")
+    timestamp = models.DateTimeField(verbose_name="Data")
+    call_type = models.IntegerField(choices=TYPES,
+                                    verbose_name="Tipo da ligação")
+    call_id = models.IntegerField(verbose_name="Código")
     source = models.CharField(max_length=11, verbose_name="Remetente")
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
 
@@ -31,23 +31,29 @@ class Call(models.Model):
         verbose_name = "Chamada"
 
 
-@receiver(post_save, sender=Call)
-def generate_call_id(sender, instance, created, **kwargs):
-    """
-    Signal do generate a call_id
-    :param sender:
-    :param instance:
-    :param created:
-    :param kwargs:
-    :return:
-    """
-    call = instance
-    if created and call.call_id is "":
-        call.call_id = hashlib.md5(str(str(call.id)+uuid.uuid4().hex)
-                                   .encode('utf-8')).hexdigest()
-        call.save()
-    elif created and call.call_id:
-        pass
+# If you want autogenerate a call_id uncomment this block and change call_id type to varchar(32)
+# @receiver(post_save, sender=Call)
+# def generate_call_id(sender, instance, created, **kwargs):
+#     """
+#     Signal do generate a call_id
+#     :param sender:
+#     :param instance:
+#     :param created:
+#     :param kwargs:
+#     :return:
+#     """
+#     call = instance
+#     if created and call.call_id is "":
+#         call.call_id = hashlib.md5(str(str(call.id)+uuid.uuid4().hex)
+#                                    .encode('utf-8')).hexdigest()
+#         call.save()
+#     elif created and call.call_id:
+#         start = Call.objects\
+#             .filter(call_type=TYPES[0][0], call_id=call.call_id).last()
+#         call.source = start.source
+#         call.destination = start.destination
+#         call.save()
+#         generate_bill.delay(call.call_id)
 
 
 class Cost(models.Model):
@@ -88,12 +94,14 @@ class Bill(models.Model):
     """
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
     call_id = models.CharField(max_length=32, verbose_name="Código",
-                               null=True, blank=False)
+                               null=True, blank=False, unique=True)
     call_start_date = models.DateField(verbose_name="Data da Ligação")
     call_start_time = models.TimeField(verbose_name="Horário da Ligação")
     call_price = models.FloatField(verbose_name="Valor da chamada")
+    duration = models.TimeField(verbose_name="Duração da Ligação",
+                                null=True)
 
-    #Metaclass
+    # Metaclass
     class Meta:
         ordering = ["-id"]
         verbose_name = "Conta"
