@@ -1,6 +1,17 @@
 version: '3'
 
 services:
+  nginx:
+    image: nginx:latest
+    container_name: ng01
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./call_project:/source
+      - ./configs/nginx.conf:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      - web
+      - database
   database:
     image: postgres
     environment:
@@ -21,11 +32,11 @@ services:
     environment:
       TIME_ZONE: America/Sao_Paulo
     build: .
-    command: bash -c "python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python3 manage.py migrate && printf 'yes' | python3 manage.py collectstatic && gunicorn call_project.wsgi -b 0.0.0.0:8000"
     volumes:
       - ./call_project:/source
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       - database
       - redis
