@@ -6,4 +6,5 @@ psycopg2==2.7.4
 psycopg2-binary==2.7.4
 celery==4.1.0
 redis==2.10.6
-django-rest-swagger
+django-rest-swagger==2.2.0
+gunicorn==19.8.1
