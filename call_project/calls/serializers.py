@@ -14,7 +14,7 @@ class CallSerializer(serializers.Serializer):
                                         max_length=11,
                                         required=False
                                         )
-    call_type = serializers.ChoiceField(choices=TYPES, required=True)
+    type = serializers.ChoiceField(choices=TYPES, required=True)
     source = serializers.CharField(min_length=10,
                                    max_length=11,
                                    required=False
@@ -24,7 +24,7 @@ class CallSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         created = Call.objects.create(**validated_data)
-        if created.call_type == TYPES[1][0]:
+        if created.type == TYPES[1][0]:
             last = Call.objects.filter(call_id=created.call_id).last()
             created.source = last.source
             created.destination = last.destination
@@ -34,19 +34,19 @@ class CallSerializer(serializers.Serializer):
 
     def validate(self, data):
         call_exist = Call.objects.filter(call_id=data['call_id'],
-                                         call_type=TYPES[1][0]).first()
+                                         type=TYPES[1][0]).first()
         if call_exist:
             raise serializers.ValidationError(
                 'This call already exists and has already been closed.')
-        if data['call_type'] == TYPES[0][0]:
+        if data['type'] == TYPES[0][0]:
             call = Call.objects.filter(source=data['source'],
                                        destination=data['destination']).first()
-            if call and call.call_type == TYPES[0][0]:
+            if call and call.type == TYPES[0][0]:
                 raise serializers.ValidationError(
                     'Warning, this call has already been terminated.')
         else:
             call_finished = Call.objects.filter(call_id=data['call_id']).first()
-            if call_finished and call_finished.call_type == TYPES[1][0]:
+            if call_finished and call_finished.type == TYPES[1][0]:
                 raise serializers.ValidationError(
                     "Hey, This call has already been closed.")
             elif call_finished and call_finished.timestamp > data['timestamp']:
@@ -59,11 +59,11 @@ class CallSerializer(serializers.Serializer):
 
     class Meta:
         model = Call
-        fields = ('call_type', 'call_id', 'source', 'destination')
+        fields = ('type', 'call_id', 'source', 'destination')
         validators = [RequiredIf(fields=('call_id',),
-                                 condition=('call_type', 2)),
+                                 condition=('type', 2)),
                       RequiredIf(fields=('source', 'destination'),
-                                 condition=('call_type', 1))
+                                 condition=('type', 1))
                       ]
 
 

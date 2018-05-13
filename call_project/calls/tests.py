@@ -19,7 +19,7 @@ class CallTests(APITestCase):
                 'destination': '41997471112',
                 'call_id': 5,
                 'timestamp': '2018-05-10 11:00:00',
-                'call_type': TYPES[0][0],
+                'type': TYPES[0][0],
                 }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -34,7 +34,7 @@ class CallTests(APITestCase):
         """
         url = reverse('calls')
         data = {'call_id': self.call_id,
-                'call_type': TYPES[1][0],
+                'type': TYPES[1][0],
                 'timestamp': '2018-05-10 11:23:00',
                 }
         response = self.client.post(url, data, format='json')
@@ -47,7 +47,7 @@ class CallTests(APITestCase):
         Ensure to validate arguments
         """
         url = reverse('calls')
-        data = {'call_type': TYPES[0][0]}
+        data = {'type': TYPES[0][0]}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['call_id'][0], "This field is required.")
@@ -59,7 +59,7 @@ class CallTests(APITestCase):
         Ensure to validate arguments
         """
         url = reverse('calls')
-        data = {'call_type': TYPES[1][0]}
+        data = {'type': TYPES[1][0]}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['call_id'][0], "This field is required.")

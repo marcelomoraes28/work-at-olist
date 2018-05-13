@@ -13,7 +13,7 @@ def generate_bill(self, call_id):
     """
     # TODO: send exceptions to Sentry, NewRelic, Graylog
     try:
-        calls = Call.objects.filter(call_id=call_id).order_by('call_type')
+        calls = Call.objects.filter(call_id=call_id).order_by('type')
         cost = Cost.objects.get(status=STATUS[0][0])
         if not calls:
             raise ValueError("Call doesn't not exist.")

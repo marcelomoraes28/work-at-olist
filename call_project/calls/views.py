@@ -20,7 +20,7 @@ class CallViewSet(APIView):
         {
             "source" : `integer`
             "destination": `integer`
-            "call_type": `integer` (1 - Start a call, 2 - Terminate a call)
+            "type": `integer` (1 - Start a call, 2 - Terminate a call)
             "call_id": `integer` (Unique identifier)
             "timestamp": `datetime`
         }
@@ -30,7 +30,7 @@ class CallViewSet(APIView):
         {
             "source" : 41997471140
             "destination": 41997471120
-            "call_type": 1
+            "type": 1
             "call_id": 1
             "timestamp": "2018-05-02 10:10:10"
         }
@@ -38,7 +38,7 @@ class CallViewSet(APIView):
         Example to terminate a call:
         ----------
         {
-            "call_type": 2
+            "type": 2
             "call_id": 1
             "timestamp": "2018-05-02 10:15:10"
         }

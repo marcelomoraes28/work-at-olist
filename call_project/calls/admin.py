@@ -10,7 +10,7 @@ class CostAdmin(admin.ModelAdmin):
 
 class CallAdmin(admin.ModelAdmin):
     list_display = ('destination', 'source', 'call_id',
-                    'call_type', 'timestamp')
+                    'type', 'timestamp')
     list_filter = ('destination', 'source', 'call_id', 'timestamp')
 
 

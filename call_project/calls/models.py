@@ -18,7 +18,7 @@ class Call(models.Model):
     Register calls =)
     """
     timestamp = models.DateTimeField(verbose_name="Data")
-    call_type = models.IntegerField(choices=TYPES,
+    type = models.IntegerField(choices=TYPES,
                                     verbose_name="Tipo da ligação")
     call_id = models.IntegerField(verbose_name="Código")
     source = models.CharField(max_length=11, verbose_name="Remetente")
@@ -48,7 +48,7 @@ class Call(models.Model):
 #         call.save()
 #     elif created and call.call_id:
 #         start = Call.objects\
-#             .filter(call_type=TYPES[0][0], call_id=call.call_id).last()
+#             .filter(type=TYPES[0][0], call_id=call.call_id).last()
 #         call.source = start.source
 #         call.destination = start.destination
 #         call.save()
