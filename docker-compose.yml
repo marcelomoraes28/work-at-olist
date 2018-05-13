@@ -8,7 +8,6 @@ services:
     build: .
     volumes:
       - ./call_project:/source
-      - ./configs/wait_for_db.sh:/source/wait_for_db.sh
     expose:
       - "8000"
     depends_on:
