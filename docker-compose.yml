@@ -16,13 +16,13 @@ services:
     links:
         - database
         - redis
-    command: bash -c "sleep 6 && printf 'yes' | python3 manage.py collectstatic && python3 manage.py migrate && python3 manage.py loaddata calls/fixtures/costs.json && gunicorn call_project.wsgi -b 0.0.0.0:8000"
+    command: bash -c "sleep 6 && printf 'yes' | python3 manage.py collectstatic && python3 manage.py migrate && python3 manage.py loaddata calls/fixtures/costs.json && python3 manage.py loaddata calls/fixtures/bills.json && python3 manage.py loaddata calls/fixtures/calls.json && gunicorn call_project.wsgi -b 0.0.0.0:8000"
   celery:
     container_name: celery
     environment:
       TIME_ZONE: America/Sao_Paulo
     build: .
-    command: celery -A call_project worker -l info
+    command: celery -A call_project worker --concurrency=4 -l info
     volumes:
       - ./call_project:/source
     depends_on:
