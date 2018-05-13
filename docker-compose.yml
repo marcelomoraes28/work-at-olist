@@ -1,24 +1,25 @@
 version: '3'
 
 services:
-  nginx:
-    image: nginx:latest
-    container_name: ng01
-    ports:
-      - "8000:8000"
+  web:
+    container_name: django
+    environment:
+      TIME_ZONE: America/Sao_Paulo
+    build: .
     volumes:
       - ./call_project:/source
-      - ./configs/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ./configs/wait_for_db.sh:/source/wait_for_db.sh
+    expose:
+      - "8000"
     depends_on:
-      - web
       - database
-  database:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: masterpass
-      POSTGRES_USER: userdb
-      POSTGRES_DB: call_project
+      - redis
+    links:
+        - database
+        - redis
+    command: bash -c "sleep 6 && printf 'yes' | python3 manage.py collectstatic && python3 manage.py migrate && python3 manage.py loaddata calls/fixtures/costs.json && gunicorn call_project.wsgi -b 0.0.0.0:8000"
   celery:
+    container_name: celery
     environment:
       TIME_ZONE: America/Sao_Paulo
     build: .
@@ -28,19 +29,28 @@ services:
     depends_on:
       - database
       - redis
-  web:
-    environment:
-      TIME_ZONE: America/Sao_Paulo
-    build: .
-    command: bash -c "python3 manage.py migrate && printf 'yes' | python3 manage.py collectstatic && gunicorn call_project.wsgi -b 0.0.0.0:8000"
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    container_name: ng01
+    ports:
+      - "80:8000"
     volumes:
       - ./call_project:/source
-    expose:
-      - "8000"
+      - ./configs/nginx.conf:/etc/nginx/conf.d/nginx.conf
     depends_on:
+      - web
       - database
       - redis
+  database:
+    container_name: database
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: masterpass
+      POSTGRES_USER: userdb
+      POSTGRES_DB: call_project
   redis:
+    container_name: redis
     image: redis:latest
     container_name: call_redis
     ports:

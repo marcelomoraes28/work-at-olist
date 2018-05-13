@@ -7,9 +7,14 @@ ENV POSTGRES_DB=call_project
 ENV POSTGRES_PORT=5432
 ENV POSTGRES_HOST=database
 
+# Source settings
+RUN rm -rf /source
 RUN mkdir -p /source
-WORKDIR /source
-ADD requirements.txt /source/
+COPY requirements.txt /source/
+
+#Requirements settings
 RUN apt install tzdata
 RUN ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
-RUN pip install -r requirements.txt
+RUN pip install -r /source/requirements.txt
+
+WORKDIR /source
