@@ -3,7 +3,6 @@ import hashlib
 
 from django.db import models
 
-
 TYPES = (
     (1, "Start"),
     (2, "End")
@@ -93,11 +92,13 @@ class Bill(models.Model):
     Bill of users
     """
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
+    source = models.CharField(max_length=11, verbose_name="Remetente")
     call_id = models.CharField(max_length=32, verbose_name="Código",
                                null=True, blank=False, unique=True)
     call_start_date = models.DateField(verbose_name="Data da Ligação")
     call_start_time = models.TimeField(verbose_name="Horário da Ligação")
-    call_price = models.FloatField(verbose_name="Valor da chamada")
+    call_price = models.DecimalField(verbose_name="Valor da chamada",
+                                     decimal_places=2, max_digits=10)
     duration = models.TimeField(verbose_name="Duração da Ligação",
                                 null=True)
 
