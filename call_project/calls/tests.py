@@ -18,7 +18,7 @@ class CallTests(APITestCase):
         url = reverse('calls')
         data = {'source': '41997471140',
                 'destination': '41997471112',
-                'call_id': 1,
+                'call_id': 5,
                 'timestamp': '2018-05-10 11:00:00',
                 'call_type': TYPES[0][0],
                 }
