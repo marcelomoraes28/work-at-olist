@@ -6,7 +6,6 @@ from calls.models import Call, TYPES
 
 
 class CallTests(APITestCase):
-
     def __init__(self, *args, **kwargs):
         super(CallTests, self).__init__(*args, **kwargs)
         self.call_id = None
@@ -52,7 +51,8 @@ class CallTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['call_id'][0], "This field is required.")
-        self.assertEqual(response.data['timestamp'][0], "This field is required.")
+        self.assertEqual(response.data['timestamp'][0],
+                         "This field is required.")
 
     def test_missing_arguments_type_two(self):
         """

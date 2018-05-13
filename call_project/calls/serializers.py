@@ -37,7 +37,7 @@ class CallSerializer(serializers.Serializer):
                                          call_type=TYPES[1][0]).first()
         if call_exist:
             raise serializers.ValidationError(
-                    'This call already exists and has already been closed.')
+                'This call already exists and has already been closed.')
         if data['call_type'] == TYPES[0][0]:
             call = Call.objects.filter(source=data['source'],
                                        destination=data['destination']).first()

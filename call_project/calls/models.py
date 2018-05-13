@@ -3,7 +3,6 @@ import hashlib
 
 from django.db import models
 
-
 TYPES = (
     (1, "Start"),
     (2, "End")
