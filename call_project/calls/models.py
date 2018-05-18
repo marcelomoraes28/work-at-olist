@@ -74,9 +74,10 @@ class Bill(models.Model):
     call_start_date = models.DateField(verbose_name="Data da Ligação")
     call_start_time = models.TimeField(verbose_name="Horário da Ligação")
     call_price = models.DecimalField(verbose_name="Valor da chamada",
-                                     decimal_places=2, max_digits=10)
+                                     decimal_places=2, max_digits=10,
+                                     null=True, blank=True)
     duration = models.TimeField(verbose_name="Duração da Ligação",
-                                null=True)
+                                null=True, blank=True)
 
     # Metaclass
     class Meta:
