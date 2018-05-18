@@ -4,8 +4,8 @@ import hashlib
 from django.db import models
 
 TYPES = (
-    (1, "Start"),
-    (2, "End")
+    (1, "start"),
+    (2, "end")
 )
 STATUS = (
     (1, "Ativo"),
@@ -19,8 +19,10 @@ class Call(models.Model):
     """
     timestamp = models.DateTimeField(verbose_name="Data")
     type = models.IntegerField(choices=TYPES,
-                                    verbose_name="Tipo da ligação")
-    call_id = models.IntegerField(verbose_name="Código")
+                               verbose_name="Tipo da ligação")
+    call_id = models.ForeignKey('Bill', to_field='call_id',
+                                verbose_name="Código",
+                                on_delete=models.CASCADE)
     source = models.CharField(max_length=11, verbose_name="Remetente")
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
 
@@ -28,31 +30,6 @@ class Call(models.Model):
     class Meta:
         ordering = ["-id"]
         verbose_name = "Chamada"
-
-
-# If you want autogenerate a call_id uncomment this block and change call_id type to varchar(32)
-# @receiver(post_save, sender=Call)
-# def generate_call_id(sender, instance, created, **kwargs):
-#     """
-#     Signal do generate a call_id
-#     :param sender:
-#     :param instance:
-#     :param created:
-#     :param kwargs:
-#     :return:
-#     """
-#     call = instance
-#     if created and call.call_id is "":
-#         call.call_id = hashlib.md5(str(str(call.id)+uuid.uuid4().hex)
-#                                    .encode('utf-8')).hexdigest()
-#         call.save()
-#     elif created and call.call_id:
-#         start = Call.objects\
-#             .filter(type=TYPES[0][0], call_id=call.call_id).last()
-#         call.source = start.source
-#         call.destination = start.destination
-#         call.save()
-#         generate_bill.delay(call.call_id)
 
 
 class Cost(models.Model):
@@ -93,8 +70,7 @@ class Bill(models.Model):
     """
     destination = models.CharField(max_length=11, verbose_name="Destinatário")
     source = models.CharField(max_length=11, verbose_name="Remetente")
-    call_id = models.CharField(max_length=32, verbose_name="Código",
-                               null=True, blank=False, unique=True)
+    call_id = models.IntegerField(unique=True, verbose_name="Código")
     call_start_date = models.DateField(verbose_name="Data da Ligação")
     call_start_time = models.TimeField(verbose_name="Horário da Ligação")
     call_price = models.DecimalField(verbose_name="Valor da chamada",
