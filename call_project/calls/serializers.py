@@ -5,7 +5,7 @@ from .models import Call, Bill, TYPES
 from .tasks import generate_bill
 
 
-class CallSerializer(serializers.Serializer):
+class CallSerializer(serializers.ModelSerializer):
     """
     Call Serializer class
     """
@@ -32,7 +32,13 @@ class CallSerializer(serializers.Serializer):
             generate_bill.delay(created.call_id)
         return created
 
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
+        """
+        Validate data before save
+        :param data:
+        :return:
+        """
         call_exist = Call.objects.filter(call_id=data['call_id'],
                                          type=TYPES[1][0]).first()
         if call_exist:
@@ -67,7 +73,7 @@ class CallSerializer(serializers.Serializer):
                       ]
 
 
-class BillSerializer(serializers.HyperlinkedModelSerializer):
+class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
         fields = ('destination', 'call_start_date', 'call_start_time',
