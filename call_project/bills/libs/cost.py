@@ -44,6 +44,12 @@ class CalculateCost(object):
 
     @staticmethod
     def validate_datetime(date_text, pattern='%Y-%m-%d %H:%M:%S'):
+        """
+        Method to validate datetime in defined pattern
+        :param date_text: datetime text
+        :param pattern: pattern to validate
+        :return:
+        """
         try:
             datetime.strptime(date_text, pattern)
         except ValueError:
