@@ -1,39 +1,25 @@
-from django.http import Http404
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import viewsets
 
-from call_project.calls.api.serializers import BillSerializer
-from call_project.calls.models import Bill
+from .serializers import BillSerializer
+from bills.models import Bill
 
 
-class BillViewSet(APIView):
+class BillViewSet(viewsets.ReadOnlyModelViewSet):
     """
     This endpoint presents Bills
     """
+    queryset = Bill.objects.all()
+    serializer_class = BillSerializer
 
-    @staticmethod
-    def _get_bill_objects(source, year, month):
-        if year and month:
-            bills = Bill.objects.filter(source=source,
-                                        call_start_date__year__gte=year,
-                                        call_start_date__month__gte=month)
-        else:
-            bills = Bill.objects.filter(source=source).first()
-        if not bills:
-            raise Http404
-        return bills
-
-    def get(self, request, source, year='', month=''):
-        """
-        Parameters
-        ----------
-        source/month/year
-
-        ----------
-        Example to get a bill:
-        ----------
-        calls/bill/10/2018
-        """
-        bill = self._get_bill_objects(source, year, month)
-        serializer = BillSerializer(bill, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        source = self.kwargs['source']
+        if 'month' and 'year' in self.kwargs:
+            month = self.kwargs['month']
+            year = self.kwargs['year']
+            return Bill.objects.filter(source=source,
+                                       call_start_date__year__gte=year,
+                                       call_start_date__month__gte=month
+                                       )
+        return Bill.objects.filter(source=source)
