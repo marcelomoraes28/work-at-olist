@@ -1,19 +1,20 @@
-from django.http import Http404
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework import viewsets, mixins
 
-from .models import Bill, TYPES
-from .serializers import CallSerializer, BillSerializer
+from .serializers import CallSerializer
+from calls.models import Call
 
 
-class CallViewSet(APIView):
+class CallViewSet(mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
     """
     This endpoint presents calls
     """
+    queryset = Call.objects.all()
+    serializer_class = CallSerializer
 
-    def post(self, request, format=None):
+    def create(self, request, *args, **kwargs):
         """
         Parameters
         ----------
@@ -43,14 +44,6 @@ class CallViewSet(APIView):
             "timestamp": "2018-05-02 10:15:10"
         }
         """
-        bill_serializer = BillSerializer(data=request.data)
-        if bill_serializer.is_valid():
-            # Save a Bill
-            bill_serializer.save()
-        else:
-            return Response(bill_serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-        request.data['call_id'] = bill_serializer.data
         call_serializer = CallSerializer(data=request.data)
         if call_serializer.is_valid():
             # Save a Call
@@ -59,36 +52,3 @@ class CallViewSet(APIView):
                             status=status.HTTP_201_CREATED)
         return Response(call_serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
-
-
-class BillViewSet(APIView):
-    """
-    This endpoint presents Bills
-    """
-
-    @staticmethod
-    def _get_bill_objects(source, year, month):
-        if year and month:
-            bills = Bill.objects.filter(source=source,
-                                        call_start_date__year__gte=year,
-                                        call_start_date__month__gte=month)
-        else:
-            bills = Bill.objects.filter(source=source).first()
-        if not bills:
-            raise Http404
-        return bills
-
-    def get(self, request, source, year='', month=''):
-        """
-        Parameters
-        ----------
-        source/month/year
-
-        ----------
-        Example to get a bill:
-        ----------
-        calls/bill/10/2018
-        """
-        bill = self._get_bill_objects(source, year, month)
-        serializer = BillSerializer(bill, many=True)
-        return Response(serializer.data)
