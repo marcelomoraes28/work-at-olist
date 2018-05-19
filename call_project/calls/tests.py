@@ -1,4 +1,3 @@
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -14,14 +13,13 @@ class CallTests(APITestCase):
         """
         Ensure we can create a new call object.
         """
-        url = reverse('calls')
         data = {'source': '41997471140',
                 'destination': '41997471112',
                 'call_id': 5,
                 'timestamp': '2018-05-10 11:00:00',
                 'type': TYPES[0][0],
                 }
-        response = self.client.post(url, data, format='json')
+        response = self.client.post('/calls/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Call.objects.count(), 1)
         self.assertEqual(Call.objects.get().call_id, response.data['call_id'])
@@ -32,12 +30,11 @@ class CallTests(APITestCase):
         """
         Ensure we can create a new call object
         """
-        url = reverse('calls')
         data = {'call_id': self.call_id,
                 'type': TYPES[1][0],
                 'timestamp': '2018-05-10 11:23:00',
                 }
-        response = self.client.post(url, data, format='json')
+        response = self.client.post('/calls/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Call.objects.count(), 2)
         self.assertEqual(Call.objects.last().call_id, response.data['call_id'])
@@ -46,9 +43,8 @@ class CallTests(APITestCase):
         """
         Ensure to validate arguments
         """
-        url = reverse('calls')
         data = {'type': TYPES[0][0]}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post('/calls/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['call_id'][0], "This field is required.")
         self.assertEqual(response.data['timestamp'][0],
@@ -58,8 +54,7 @@ class CallTests(APITestCase):
         """
         Ensure to validate arguments
         """
-        url = reverse('calls')
         data = {'type': TYPES[1][0]}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post('/calls/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['call_id'][0], "This field is required.")
