@@ -20,7 +20,7 @@ def generate_bill(self, call_id):
         if not calls:
             raise ValueError("Call doesn't not exist.")
 
-        if calls.count() == 1:
+        if int(calls.count()) is 1:
             raise self.retry(countdown=15)
 
         calculate_cost = CalculateCost(cost.cost_per_minute,
