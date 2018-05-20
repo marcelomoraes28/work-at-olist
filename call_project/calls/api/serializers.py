@@ -28,26 +28,31 @@ class CallSerializer(serializers.ModelSerializer):
         call_exist = Call.objects.filter(call_id=data['call_id'],
                                          type=TYPES[1][0]).first()
         if call_exist:
-            raise serializers.ValidationError(
-                'This call already exists and has already been closed.')
+            raise serializers.ValidationError({
+                'call_id': 'This call already exists and has already '
+                           'been closed.'})
         if data['type'] == TYPES[0][0]:
             call = Call.objects.filter(source=data['source'],
                                        destination=data['destination']).first()
             if call and call.type == TYPES[0][0]:
-                raise serializers.ValidationError(
-                    'Warning, this call has already been terminated.')
+                raise serializers.ValidationError({
+                    'call_id': 'Warning, this'
+                               ' call has already been terminated.'
+                })
         else:
             call_finished = Call.objects.filter(
                 call_id=data['call_id']).first()
             if call_finished and call_finished.type == TYPES[1][0]:
-                raise serializers.ValidationError(
-                    "Hey, This call has already been closed.")
+                raise serializers.ValidationError({
+                    'call_id': 'Hey, This call has already been closed.'})
             elif call_finished and call_finished.timestamp > data['timestamp']:
-                raise serializers.ValidationError(
-                    "The date can not be less than %s" % call_finished.timestamp)
+                raise serializers.ValidationError({
+                    'timestamp': 'The date can not be '
+                                 'less than %s' % call_finished.timestamp
+                })
             elif not call_finished:
-                raise serializers.ValidationError(
-                    "Hey, This call does not exist.")
+                raise serializers.ValidationError({
+                    'call_id': 'Hey, This call does not exist.'})
         return data
 
     class Meta:
