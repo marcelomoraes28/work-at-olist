@@ -16,8 +16,9 @@ class Bill(models.Model):
     call_price = models.DecimalField(verbose_name="Cost of call",
                                      decimal_places=2, max_digits=10,
                                      null=True, blank=True)
-    duration = models.TimeField(verbose_name="Duration time",
-                                null=True, blank=True)
+    duration = models.CharField(verbose_name="Duration time",
+                                null=True, blank=True,
+                                max_length=9)
     calls = models.ManyToManyField(Call)
 
     def __str__(self):
