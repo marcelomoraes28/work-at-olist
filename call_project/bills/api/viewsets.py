@@ -22,4 +22,4 @@ class BillViewSet(viewsets.ReadOnlyModelViewSet):
                                        call_start_date__year__gte=year,
                                        call_start_date__month__gte=month
                                        )
-        return Bill.objects.filter(source=source)
+        return [Bill.objects.filter(source=source).first()]
