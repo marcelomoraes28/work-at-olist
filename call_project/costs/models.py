@@ -5,6 +5,7 @@ STATUS = (
     (2, "Inativo")
 )
 
+
 class Cost(models.Model):
     """
     Configuration cost per calls
