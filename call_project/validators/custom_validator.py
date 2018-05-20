@@ -3,8 +3,6 @@ This is a custom packet valitations
 """
 
 from __future__ import unicode_literals
-
-from django.db import DataError
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework.exceptions import ValidationError

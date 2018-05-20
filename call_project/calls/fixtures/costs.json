@@ -1,1 +1,0 @@
-[{"model": "calls.cost", "pk": 1, "fields": {"created_at": "2018-05-12", "connection_cost": 0.36, "cost_per_minute": 0.09, "initial_period": "06:00:00", "end_period": "22:00:00", "status": 1}}]
