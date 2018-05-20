@@ -8,4 +8,3 @@ class CallAdmin(admin.ModelAdmin):
     list_filter = ('destination', 'source', 'call_id', 'timestamp')
 
 admin.site.register(Call, CallAdmin)
-
